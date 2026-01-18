@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>iGaming Checker – Proofreading & SEO</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input[type="file"], select { margin-top: 4px; }
+    select { width: 250px; padding: 6px; }
+    button { margin-top: 15px; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+  <h1>iGaming Article Checker (Proofreading + SEO)</h1>
+
+  <form action="/run" method="post" enctype="multipart/form-data">
+    <label>Article (DOCX)</label>
+    <input type="file" name="article_file" accept=".docx" required>
+
+    <label>Task Brief (DOCX or XLS/XLSX)</label>
+    <input type="file" name="brief_file" accept=".docx,.xls,.xlsx" required>
+
+    <label>English variant</label>
+    <select name="english_variant">
+      <option value="UK">British English</option>
+      <option value="US">American English</option>
+      <option value="Canadian">Canadian English</option>
+      <option value="Australian">Australian English</option>
+      <option value="New Zealand">New Zealand English</option>
+      <option value="Indian">Indian English</option>
+    </select>
+
+    <br>
+    <button type="submit">Run checks</button>
+  </form>
+</body>
+</html>

@@ -1,0 +1,7 @@
+flask
+openai
+python-docx
+pandas
+requests
+beautifulsoup4
+playwright

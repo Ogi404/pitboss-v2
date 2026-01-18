@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Proofreading & SEO Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2, h3, h4 { margin-top: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; vertical-align: top; }
+    th { background: #eee; }
+    pre { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; background: #fafafa; }
+    ul { margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Proofreading -->
+  <h1>Proofreading Report</h1>
+  <p><strong>English variant:</strong> {{ english_variant }}</p>
+
+  <h2>Sentence-level corrections</h2>
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Original</th>
+      <th>Corrected</th>
+      <th>Status</th>
+      <th>Explanation</th>
+    </tr>
+    {% for s in sentences %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ s.original }}</td>
+      <td>{{ s.corrected }}</td>
+      <td>{{ s.status }}</td>
+      <td>{{ s.explanation }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Clean corrected article</h2>
+  <pre>{{ clean_article }}</pre>
+
+  <!-- 2. SEO / Structure -->
+  <h2>SEO & Structure Report</h2>
+
+  <h3>Headings</h3>
+  {% if seo_headings %}
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Level</th>
+      <th>Text</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+    {% for h in seo_headings %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ h.level }}</td>
+      <td>{{ h.text }}</td>
+      <td>{{ h.status }}</td>
+      <td>{{ h.notes }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p>No heading data returned.</p>
+  {% endif %}
+
+  <h3>Keywords</h3>
+  {% if seo_keywords %}
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Keyword</th>
+      <th>Group</th>
+      <th>Found</th>
+      <th>Required min</th>
+      <th>Required max</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+    {% for k in seo_keywords %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ k.keyword }}</td>
+      <td>{{ k.group }}</td>
+      <td>{{ k.found }}</td>
+      <td>{{ k.required_min }}</td>
+      <td>{{ k.required_max }}</td>
+      <td>{{ k.status }}</td>
+      <td>{{ k.notes }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p>No keyword audit data returned.</p>
+  {% endif %}
+
+  <h3>Meta information</h3>
+  <ul>
+    <li>Has meta title: {{ seo_meta.has_meta_title if seo_meta else 'unknown' }}</li>
+    <li>Has meta description: {{ seo_meta.has_meta_description if seo_meta else 'unknown' }}</li>
+  </ul>
+  {% if seo_meta and seo_meta.issues %}
+    <p><strong>Meta issues:</strong></p>
+    <ul>
+      {% for issue in seo_meta.issues %}
+        <li>{{ issue }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <h3>Structure issues</h3>
+  {% if seo_structure_issues %}
+    <ul>
+      {% for issue in seo_structure_issues %}
+        <li>{{ issue }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No structure issues reported.</p>
+  {% endif %}
+
+  <!-- 3. Content Quality vs Heading Requirements -->
+  <h2>Content Quality vs Heading Requirements</h2>
+  {% if seo_content_quality %}
+    {% for qc in seo_content_quality %}
+      <h3>{{ qc.brief_heading }}</h3>
+      <p><strong>Article heading:</strong>
+        {% if qc.article_heading %}
+          {{ qc.article_heading }}
+        {% else %}
+          <em>Not found in article</em>
+        {% endif %}
+      </p>
+      <p><strong>Overall status:</strong> {{ qc.status }}</p>
+      {% if qc.notes %}
+        <p>{{ qc.notes }}</p>
+      {% endif %}
+
+      {% if qc.requirements %}
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Required subtopic</th>
+            <th>Coverage</th>
+            <th>Notes</th>
+          </tr>
+          {% for r in qc.requirements %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ r.requirement }}</td>
+            <td>{{ r.coverage }}</td>
+            <td>{{ r.notes }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p>No explicit per-heading content guidelines were detected in the task brief, so no heading-level content quality check was run.</p>
+  {% endif %}
+
+</body>
+</html>
