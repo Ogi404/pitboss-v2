@@ -2,25 +2,99 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>iGaming Checker – Proofreading & SEO</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input[type="file"], select { margin-top: 4px; }
-    select { width: 250px; padding: 6px; }
-    button { margin-top: 15px; padding: 8px 16px; }
-  </style>
+  <title>iGaming Checker - Proofreading & SEO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-  <h1>iGaming Article Checker (Proofreading + SEO)</h1>
+<body class="max-width-700">
+  <h1>iGaming Article Checker</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  <p>Proofreading + SEO Analysis</p>
 
   <form action="/run" method="post" enctype="multipart/form-data">
-    <label>Article (DOCX)</label>
-    <input type="file" name="article_file" accept=".docx" required>
 
-    <label>Task Brief (DOCX or XLS/XLSX)</label>
-    <input type="file" name="brief_file" accept=".docx,.xls,.xlsx" required>
+    <!-- Source Selection -->
+    <div class="source-selection">
+      <strong>Article Source:</strong><br><br>
+      <label>
+        <input type="radio" name="source_type" value="docx" checked onchange="toggleSourceInputs()">
+        Upload DOCX file
+      </label>
+      <label>
+        <input type="radio" name="source_type" value="google_doc" onchange="toggleSourceInputs()">
+        Google Doc URL
+      </label>
+    </div>
 
+    <!-- DOCX Upload -->
+    <div id="docx-input" class="source-input">
+      <label>Article (DOCX)</label>
+      <input type="file" name="article_file" accept=".docx">
+    </div>
+
+    <!-- Google Doc URL -->
+    <div id="google-doc-input" class="source-input hidden">
+      <label>Google Doc URL</label>
+      <input type="url" name="google_doc_url" placeholder="https://docs.google.com/document/d/...">
+
+      {% if google_authorized %}
+      <div class="google-auth">
+        Connected as <span class="connected-email">{{ google_email }}</span>
+        <a href="/logout" class="disconnect-link">(disconnect)</a>
+      </div>
+      {% else %}
+      <div class="google-auth not-connected">
+        <p>To use Google Docs, you need to connect your Google account.</p>
+        <a href="/auth/google" class="btn-google">Connect Google Account</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Brief Source Selection (Phase 8) -->
+    <div class="source-selection">
+      <strong>Brief Source:</strong><br><br>
+      <label>
+        <input type="radio" name="brief_source_type" value="file" checked onchange="toggleBriefInputs()">
+        Upload File (DOCX/Excel)
+      </label>
+      <label>
+        <input type="radio" name="brief_source_type" value="google_sheet" onchange="toggleBriefInputs()">
+        Google Sheet URL
+      </label>
+    </div>
+
+    <!-- Brief File Upload -->
+    <div id="brief-file-input" class="source-input">
+      <label>Task Brief (DOCX or XLS/XLSX)</label>
+      <input type="file" name="brief_file" accept=".docx,.xls,.xlsx">
+    </div>
+
+    <!-- Brief Google Sheet URL -->
+    <div id="brief-sheet-input" class="source-input hidden">
+      <label>Google Sheet URL</label>
+      <input type="url" name="brief_sheet_url" placeholder="https://docs.google.com/spreadsheets/d/...">
+
+      {% if google_authorized %}
+      <div class="google-auth">
+        Connected as <span class="connected-email">{{ google_email }}</span>
+      </div>
+      {% else %}
+      <div class="google-auth not-connected">
+        <p>To use Google Sheets, you need to connect your Google account.</p>
+        <a href="/auth/google" class="btn-google">Connect Google Account</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- English Variant -->
     <label>English variant</label>
     <select name="english_variant">
       <option value="UK">British English</option>
@@ -31,8 +105,176 @@
       <option value="Indian">Indian English</option>
     </select>
 
+    <!-- Brand Style Guide -->
+    <label>Brand Style Guide</label>
+    <select name="brand_name">
+      {% for brand in available_brands %}
+      <option value="{{ brand }}">{{ brand|replace('_', ' ')|title }}</option>
+      {% endfor %}
+    </select>
+
+    <!-- Check Toggles (Phase 9) -->
+    <fieldset class="check-toggles-section">
+      <legend>Checks to Run</legend>
+      <p class="hint">Uncheck to skip specific checks. All enabled by default.</p>
+      <div class="check-toggles-grid">
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="proofread" checked>
+          <span>Proofreading</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="keywords" checked>
+          <span>Keywords</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="seo_structure" checked>
+          <span>SEO Structure</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="compliance" checked>
+          <span>Compliance</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="formatting" checked>
+          <span>Formatting</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="readability" checked>
+          <span>Readability</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="word_counts" checked>
+          <span>Word Counts</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="consistency" checked>
+          <span>Consistency</span>
+        </label>
+        <label class="check-toggle">
+          <input type="checkbox" name="enabled_checks" value="style" checked>
+          <span>Style</span>
+        </label>
+      </div>
+      <div class="check-toggle-actions">
+        <button type="button" onclick="toggleAllChecks(true)">Select All</button>
+        <button type="button" onclick="toggleAllChecks(false)">Deselect All</button>
+      </div>
+    </fieldset>
+
+    <!-- Fact-Check Section (Optional) -->
+    <fieldset class="fact-check-section">
+      <legend>Fact-Check (Optional)</legend>
+      <p class="hint">Verify article claims against the operator's website. Leave empty to skip.</p>
+
+      <label>Operator URL</label>
+      <input type="url" name="operator_url" placeholder="https://example-casino.com/">
+
+      <label>Target Market</label>
+      <select name="geo_target">
+        <option value="">Select market...</option>
+        <option value="UK (GBP)">UK (GBP)</option>
+        <option value="Canada (CAD)">Canada (CAD)</option>
+        <option value="Australia (AUD)">Australia (AUD)</option>
+        <option value="New Zealand (NZD)">New Zealand (NZD)</option>
+        <option value="Germany (EUR)">Germany (EUR)</option>
+        <option value="Ireland (EUR)">Ireland (EUR)</option>
+        <option value="International (USD)">International (USD)</option>
+        <option value="International (EUR)">International (EUR)</option>
+      </select>
+
+      <label>Categories to Verify</label>
+      <div class="category-checkboxes">
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="1" checked> Welcome Bonus & Promotions
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="2"> VIP/Loyalty Program
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="3" checked> Payment Methods
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="4" checked> Wagering Requirements & Terms
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="5"> Game Providers
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="6" checked> Game Selection
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="7"> Mobile Compatibility
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="8"> Customer Support
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="9" checked> Licensing & Security
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="10"> Responsible Gambling
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="11"> Country/Currency
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="12" checked> Withdrawal Limits & Times
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fact_categories" value="13"> General Brand Info
+        </label>
+      </div>
+    </fieldset>
+
     <br>
     <button type="submit">Run checks</button>
   </form>
+
+  <script>
+    function toggleSourceInputs() {
+      const sourceType = document.querySelector('input[name="source_type"]:checked').value;
+      const docxInput = document.getElementById('docx-input');
+      const googleDocInput = document.getElementById('google-doc-input');
+      const articleFileInput = document.querySelector('input[name="article_file"]');
+
+      if (sourceType === 'google_doc') {
+        docxInput.classList.add('hidden');
+        googleDocInput.classList.remove('hidden');
+        articleFileInput.removeAttribute('required');
+      } else {
+        docxInput.classList.remove('hidden');
+        googleDocInput.classList.add('hidden');
+        articleFileInput.setAttribute('required', 'required');
+      }
+    }
+
+    function toggleBriefInputs() {
+      const briefSourceType = document.querySelector('input[name="brief_source_type"]:checked').value;
+      const briefFileInput = document.getElementById('brief-file-input');
+      const briefSheetInput = document.getElementById('brief-sheet-input');
+      const briefFileField = document.querySelector('input[name="brief_file"]');
+
+      if (briefSourceType === 'google_sheet') {
+        briefFileInput.classList.add('hidden');
+        briefSheetInput.classList.remove('hidden');
+        briefFileField.removeAttribute('required');
+      } else {
+        briefFileInput.classList.remove('hidden');
+        briefSheetInput.classList.add('hidden');
+        briefFileField.setAttribute('required', 'required');
+      }
+    }
+
+    function toggleAllChecks(checked) {
+      const checkboxes = document.querySelectorAll('input[name="enabled_checks"]');
+      checkboxes.forEach(function(checkbox) {
+        checkbox.checked = checked;
+      });
+    }
+
+    // Initialize on page load
+    toggleSourceInputs();
+    toggleBriefInputs();
+  </script>
 </body>
 </html>

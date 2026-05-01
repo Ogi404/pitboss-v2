@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% if comment_mode %}Comments{% else %}Corrections{% endif %} Applied - iGaming Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="max-width-700">
+
+  <h1>{% if comment_mode %}Comments{% else %}Corrections{% endif %} Applied</h1>
+
+  {% if applied_count > 0 %}
+  <div class="success-message">
+    <h2>Success!</h2>
+    {% if comment_mode %}
+    <p>{{ applied_count }} comment{% if applied_count != 1 %}s{% endif %} added to your Google Doc.</p>
+    <p><em>Comments will appear in the document's comment sidebar. Writers can resolve them after addressing the issues.</em></p>
+    {% else %}
+    <p>{{ applied_count }} correction{% if applied_count != 1 %}s{% endif %} applied to your Google Doc.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if skipped and skipped|length > 0 %}
+  <div class="warning-message">
+    <h3>Some corrections were skipped</h3>
+    <p>The following corrections could not be applied because the text was not found in the document:</p>
+    <ul>
+      {% for s in skipped %}
+      <li>
+        <strong>"{{ s.original[:50] }}{% if s.original|length > 50 %}...{% endif %}"</strong>
+        - {{ s.reason }}
+      </li>
+      {% endfor %}
+    </ul>
+    <p><em>This can happen if the document was modified after analysis, or if the text appears differently in the document.</em></p>
+  </div>
+  {% endif %}
+
+  {% if failed and failed|length > 0 %}
+  <div class="error-message">
+    <h3>Errors occurred</h3>
+    <ul>
+      {% for f in failed %}
+      <li>{{ f.error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="actions">
+    <a href="{{ google_doc_url }}" target="_blank" class="btn-primary">
+      Open Document in Google Docs
+    </a>
+    <a href="/" class="btn-secondary">
+      Start New Check
+    </a>
+  </div>
+
+</body>
+</html>

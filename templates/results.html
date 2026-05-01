@@ -2,18 +2,19 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Proofreading & SEO Report</title>
+  <title>Proofreading & SEO Report - iGaming Checker</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
   <h1>Proofreading & SEO Report</h1>
-  <div style="margin-bottom: 15px;">
-    <strong>English variant:</strong> {{ english_variant }}
-    {% if session_id %}
-    <a href="{{ url_for('export_report', session_id=session_id) }}" class="btn-export" style="float: right;">Download Report (DOCX)</a>
-    {% endif %}
+
+  <div class="doc-link">
+    Analyzing: <a href="{{ google_doc_url }}" target="_blank">Open in Google Docs</a>
+    <a href="{{ url_for('export_report', session_id=session_id) }}" class="btn-export">Download Report (DOCX)</a>
   </div>
+
+  <p><strong>English variant:</strong> {{ english_variant }}</p>
 
   <!-- Summary Bar -->
   <div class="report-summary">
@@ -43,7 +44,7 @@
   <div class="report-tabs">
     <button class="tab-button active" data-tab="corrections" onclick="switchTab('corrections')">
       Corrections
-      {% set correction_count = sentences|selectattr('status', 'equalto', 'corrected')|list|length %}
+      {% set correction_count = corrections|selectattr('status', 'equalto', 'corrected')|list|length %}
       {% if correction_count > 0 %}
       <span class="tab-badge badge-warn">{{ correction_count }}</span>
       {% endif %}
@@ -79,38 +80,102 @@
 
   <!-- Tab: Corrections -->
   <div id="tab-corrections" class="tab-content active">
-    <h2>Sentence-level Corrections</h2>
-    <table class="corrections-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Original</th>
-          <th>Corrected</th>
-          <th>Status</th>
-          <th>Explanation</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in sentences %}
-        {% if s.status == 'corrected' %}
-        <tr class="correction-row">
-          <td>{{ loop.index }}</td>
-          <td class="original-text">{{ s.original }}</td>
-          <td class="corrected-text">{{ s.corrected }}</td>
-          <td>{{ s.status }}</td>
-          <td>{{ s.explanation }}</td>
-        </tr>
-        {% else %}
-        <tr class="no-change-row">
-          <td>{{ loop.index }}</td>
-          <td colspan="4">{{ s.original }} - <em>No change needed</em></td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
+    <form action="/apply-corrections" method="POST" id="corrections-form">
+      <input type="hidden" name="session_id" value="{{ session_id }}">
 
-    <h2>Clean Corrected Article</h2>
+      <!-- Selection Controls -->
+      <div class="selection-controls">
+        <button type="button" onclick="selectAll()">Select All</button>
+        <button type="button" onclick="selectNone()">Select None</button>
+        <button type="button" onclick="selectCorrectedOnly()">Select Corrections Only</button>
+        <span class="selection-count">
+          <span id="selected-count">0</span> selected
+        </span>
+      </div>
+
+      <!-- Corrections Table -->
+      <h2>Sentence-level Corrections</h2>
+      <table class="corrections-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>#</th>
+            <th>Original</th>
+            <th>Corrected</th>
+            <th>Status</th>
+            <th>Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in corrections %}
+          {% if c.status == 'corrected' %}
+          <tr class="correction-row" data-correction-id="{{ c.id }}">
+            <td>
+              {% if c.position_found %}
+                {% if c.occurrences|length == 1 %}
+                  <input type="checkbox" name="corrections[]" value="{{ c.id }}"
+                         class="correction-checkbox" data-corrected="true">
+                {% else %}
+                  <!-- Multiple occurrences - show radio buttons -->
+                  <input type="checkbox" class="correction-checkbox master-checkbox"
+                         data-corrected="true" data-has-occurrences="true"
+                         data-correction-id="{{ c.id }}"
+                         onchange="toggleOccurrenceSelector(this)">
+                {% endif %}
+              {% else %}
+                <span class="not-found-warning" title="Text not found in document">?</span>
+              {% endif %}
+            </td>
+            <td>{{ loop.index }}</td>
+            <td class="original-text">{{ c.original }}</td>
+            <td class="corrected-text">{{ c.corrected }}</td>
+            <td>{{ c.status }}</td>
+            <td>{{ c.explanation }}</td>
+          </tr>
+          {% if c.occurrences|length > 1 %}
+          <tr class="occurrence-row hidden" data-parent="{{ c.id }}">
+            <td colspan="6">
+              <div class="occurrence-selector">
+                <strong>This text appears {{ c.occurrences|length }} times. Select which to correct:</strong>
+                {% for occ in c.occurrences %}
+                <div class="occurrence-option">
+                  <label>
+                    <input type="radio" name="corrections[]" value="{{ c.id }}_occ_{{ occ.occurrence_num }}"
+                           class="occurrence-radio" data-parent="{{ c.id }}">
+                    <span class="occurrence-context">
+                      ...{{ occ.context_before }}<span class="match">{{ c.original }}</span>{{ occ.context_after }}...
+                    </span>
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+          {% else %}
+          <tr class="no-change-row">
+            <td></td>
+            <td>{{ loop.index }}</td>
+            <td colspan="4">{{ c.original }} - <em>No change needed</em></td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Apply Button -->
+      <div class="apply-section">
+        <button type="submit" class="btn-apply" id="apply-btn" disabled>
+          Apply Selected Corrections to Google Doc
+        </button>
+        <p class="apply-note">
+          This will modify your Google Doc directly. Use Google Docs version history if you need to undo changes.
+        </p>
+      </div>
+    </form>
+
+    <!-- Clean Article Preview -->
+    <h2>Clean Corrected Article (Preview)</h2>
     <pre>{{ clean_article }}</pre>
   </div>
 
@@ -211,30 +276,6 @@
     {% else %}
       <p>No structure issues reported.</p>
     {% endif %}
-
-    <!-- Word Counts (part of SEO) -->
-    {% if quality_checks.word_counts %}
-    <h3>Word Counts by Section</h3>
-    <p><strong>Status:</strong> {{ quality_checks.word_counts.summary }}</p>
-    {% if quality_checks.word_counts.details.sections %}
-    <table>
-      <tr>
-        <th>Section</th>
-        <th>Level</th>
-        <th>Words</th>
-        <th>Status</th>
-      </tr>
-      {% for section in quality_checks.word_counts.details.sections %}
-      <tr>
-        <td>{{ section.heading }}</td>
-        <td>{{ section.level or '-' }}</td>
-        <td>{{ section.word_count }}</td>
-        <td>{{ section.status }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-    {% endif %}
-    {% endif %}
   </div>
 
   <!-- Tab: Compliance -->
@@ -298,7 +339,29 @@
       <li>
         <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
         {{ finding.recommendation }}
-        <br><small>Examples: {{ finding.examples|join(', ') }}</small>
+        {% if finding.occurrences %}
+        <table class="occurrences-table" style="margin-top: 8px; font-size: 0.9em;">
+          <tr><th>Text</th><th>Format</th><th>Location</th></tr>
+          {% for occ in finding.occurrences %}
+          <tr>
+            <td><code>{{ occ.text }}</code></td>
+            <td>{{ occ.format }}</td>
+            <td>{{ occ.location }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+        {% if finding.non_conforming_headings %}
+        <table class="occurrences-table" style="margin-top: 8px; font-size: 0.9em;">
+          <tr><th>Current</th><th>Suggested</th></tr>
+          {% for h in finding.non_conforming_headings %}
+          <tr>
+            <td>"{{ h.current }}" ({{ h.current_style }})</td>
+            <td>"{{ h.suggested }}"</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -325,13 +388,43 @@
         <li>
           <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
           {{ finding.message }}
+          {% if finding.location %}
+          <br><strong>Location:</strong> {{ finding.location }}
+          {% endif %}
           {% if finding.text %}
-          <br><small>"{{ finding.text[:100] }}..."</small>
+          <br><small>Text: "<code>{{ finding.text[:80] }}</code>{% if finding.text|length > 80 %}...{% endif %}"</small>
+          {% endif %}
+          {% if finding.preview %}
+          <br><small>Text: "<code>{{ finding.preview[:80] }}</code>{% if finding.preview|length > 80 %}...{% endif %}"</small>
           {% endif %}
         </li>
         {% endfor %}
       </ul>
     </details>
+    {% endif %}
+    {% endif %}
+
+    <!-- Word Counts Check -->
+    {% if quality_checks.word_counts %}
+    <h3>Word Counts by Section</h3>
+    <p><strong>Status:</strong> {{ quality_checks.word_counts.summary }}</p>
+    {% if quality_checks.word_counts.details.sections %}
+    <table>
+      <tr>
+        <th>Section</th>
+        <th>Level</th>
+        <th>Words</th>
+        <th>Status</th>
+      </tr>
+      {% for section in quality_checks.word_counts.details.sections %}
+      <tr>
+        <td>{{ section.heading }}</td>
+        <td>{{ section.level or '-' }}</td>
+        <td>{{ section.word_count }}</td>
+        <td>{{ section.status }}</td>
+      </tr>
+      {% endfor %}
+    </table>
     {% endif %}
     {% endif %}
 
@@ -384,8 +477,25 @@
       <li class="severity-{{ finding.severity }}">
         <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
         {{ finding.message }}
+        {% if finding.description %}
+        <br>{{ finding.description }}
+        {% endif %}
+        {% if finding.occurrences %}
+        <details style="margin-top: 5px;">
+          <summary>Show {{ finding.occurrences|length }} occurrence(s)</summary>
+          <table class="occurrences-table" style="font-size: 0.9em;">
+            <tr><th>Context</th><th>Location</th></tr>
+            {% for occ in finding.occurrences[:8] %}
+            <tr>
+              <td><code>{{ occ.context|safe }}</code></td>
+              <td>{{ occ.location }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </details>
+        {% endif %}
         {% if finding.suggestion %}
-        <br><small><em>{{ finding.suggestion }}</em></small>
+        <br><small><em>Suggestion: {{ finding.suggestion }}</em></small>
         {% endif %}
       </li>
       {% endfor %}
@@ -490,13 +600,9 @@
         </tbody>
       </table>
 
-      {% if source_type == 'google_doc' %}
       <div style="margin-top: 20px;">
         <button type="submit" class="apply-btn">Apply Selected Comments to Google Doc</button>
       </div>
-      {% else %}
-      <p class="info-box">Comments can only be applied automatically to Google Docs. For uploaded files, copy comments manually.</p>
-      {% endif %}
     </form>
     {% else %}
     <div class="success-message">
@@ -634,6 +740,86 @@
       document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
     }
 
+    function updateCount() {
+      const checkboxes = document.querySelectorAll('.correction-checkbox:checked');
+      const radios = document.querySelectorAll('.occurrence-radio:checked');
+      const count = checkboxes.length + radios.length;
+      document.getElementById('selected-count').textContent = count;
+      document.getElementById('apply-btn').disabled = count === 0;
+    }
+
+    function selectAll() {
+      document.querySelectorAll('.correction-checkbox').forEach(cb => {
+        cb.checked = true;
+        if (cb.dataset.hasOccurrences) {
+          toggleOccurrenceSelector(cb);
+          // Select first occurrence by default
+          const parentId = cb.dataset.correctionId;
+          const firstRadio = document.querySelector(`.occurrence-radio[data-parent="${parentId}"]`);
+          if (firstRadio) firstRadio.checked = true;
+        }
+      });
+      updateCount();
+    }
+
+    function selectNone() {
+      document.querySelectorAll('.correction-checkbox').forEach(cb => {
+        cb.checked = false;
+        if (cb.dataset.hasOccurrences) {
+          toggleOccurrenceSelector(cb);
+        }
+      });
+      document.querySelectorAll('.occurrence-radio').forEach(r => r.checked = false);
+      updateCount();
+    }
+
+    function selectCorrectedOnly() {
+      document.querySelectorAll('.correction-checkbox').forEach(cb => {
+        if (cb.dataset.corrected === 'true') {
+          cb.checked = true;
+          if (cb.dataset.hasOccurrences) {
+            toggleOccurrenceSelector(cb);
+            const parentId = cb.dataset.correctionId;
+            const firstRadio = document.querySelector(`.occurrence-radio[data-parent="${parentId}"]`);
+            if (firstRadio) firstRadio.checked = true;
+          }
+        }
+      });
+      updateCount();
+    }
+
+    function toggleOccurrenceSelector(checkbox) {
+      const corrId = checkbox.dataset.correctionId;
+      const occRow = document.querySelector(`.occurrence-row[data-parent="${corrId}"]`);
+      if (occRow) {
+        if (checkbox.checked) {
+          occRow.classList.remove('hidden');
+        } else {
+          occRow.classList.add('hidden');
+          // Uncheck all occurrence radios
+          document.querySelectorAll(`.occurrence-radio[data-parent="${corrId}"]`).forEach(r => r.checked = false);
+        }
+      }
+      updateCount();
+    }
+
+    // Add event listeners
+    document.querySelectorAll('.correction-checkbox').forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (!this.dataset.hasOccurrences) {
+          updateCount();
+        }
+      });
+    });
+
+    document.querySelectorAll('.occurrence-radio').forEach(r => {
+      r.addEventListener('change', updateCount);
+    });
+
+    // Initialize count
+    updateCount();
+
+    // Writer comments toggle
     function toggleAllComments(source) {
       var checkboxes = document.querySelectorAll('.comment-checkbox');
       checkboxes.forEach(function(checkbox) {

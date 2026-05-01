@@ -1,0 +1,31 @@
+# Environment variables (contains secrets)
+.env
+
+# Google OAuth credentials
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Flask session files
+.flask_session/
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# User data
+briefs/
+
+# Windows artifacts
+nul
+next
+
+# Test files
+test_crawl*.py

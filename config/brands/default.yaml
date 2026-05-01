@@ -1,0 +1,266 @@
+# =============================================================================
+# Company Default Style Guide
+# =============================================================================
+# This is the base configuration containing company-wide writing rules from
+# "General Writing Requirements.md". All brand-specific configs inherit from
+# this file - they only need to specify overrides.
+# =============================================================================
+
+brand_name: "Company Default Style"
+
+# =============================================================================
+# Voice and Perspective (§4 Language, §7 Who's Talking)
+# =============================================================================
+voice:
+  # Voice preference: "second" (you/your) - conversational, engaging
+  person: "second"
+
+  # Tone: conversational, friendly, optimistic, simple
+  # "It's a text written for people, by people"
+  tone: "conversational"
+
+  # Formality: friendly and optimistic but professional
+  formality: "friendly_optimistic"
+
+  # Default perspective: write on behalf of the gambling expert team
+  # "If not specified otherwise: Write like you're talking on behalf of the gambling expert team"
+  perspective: "gambling_expert_team"
+
+  # Content should not sound robotic - must feel human-written
+  no_robotic: true
+
+# =============================================================================
+# Structure Rules (§5 Readability, §10 Structure & Headings)
+# =============================================================================
+structure:
+  # "Use shorter sentences" - stricter than before
+  max_sentence_words: 30
+
+  # "Keep paragraphs short and concise, ideally 3-5 sentences long"
+  min_paragraph_sentences: 3
+  max_paragraph_sentences: 5
+
+  # Max words per paragraph (fallback for word-based checking)
+  max_paragraph_words: 120
+
+  # "Bullet Points & Lists: Use these for features, pros/cons, or game lists"
+  use_bullet_lists: true
+
+  # "Your first and last paragraphs have to stand out"
+  # "The intro is engaging and concise, the outro is summing up the general thoughts"
+  require_intro_section: true
+  require_outro_section: true
+
+  # "Use descriptive headings – they should show, at a glance, what the section will cover"
+  require_descriptive_headings: true
+
+  # "There is the H1->H2->H3->H4 hierarchy for headings"
+  heading_hierarchy: "H1->H2->H3->H4"
+
+  # "There has to be at least 1 small paragraph between two headings"
+  min_paragraphs_between_headings: 1
+
+  # Heading capitalization rules (for English, capitalize; varies by language)
+  heading_capitalization: "title_case"
+
+# =============================================================================
+# Formatting Rules (§11 Currencies)
+# =============================================================================
+formatting:
+  # "Write currencies abbreviations (e.g., CAD, USD, EUR) OR symbols ($, C$, €). Not both."
+  # This means within a single article, be consistent - use one style only
+  currency_format: "symbol_only"
+
+  # Default currency symbol
+  currency_symbol: "$"
+
+  # Percentage format: no space before %
+  percentage_format: "no_space"
+
+  # Wagering format: lowercase x (e.g., 35x)
+  wagering_format: "x_lower"
+
+# =============================================================================
+# Banned/Questionable Language (§4 Language)
+# =============================================================================
+banned_phrases:
+  # Hard banned - always flag as error (regulatory/misleading)
+  errors:
+    - "risk-free"
+    - "guaranteed win"
+    - "no-lose"
+    - "sure bet"
+    - "100% safe"
+    - "free money"
+    - "can't lose"
+    - "always win"
+    - "certain win"
+    - "winning guaranteed"
+
+  # Soft banned - flag as warning
+  # Includes "questionable language" from §4 and unsubstantiated claims
+  warnings:
+    # Questionable language (§4: "No usage of swearing or 'questionable' language")
+    - "sucks"
+    - "jerk"
+    # Abbreviations to avoid (§4: "There are no e.g., i.e., etc. – just get straight to the point")
+    - "e.g."
+    - "i.e."
+    - "etc."
+    # Unsubstantiated comparative claims
+    - "best casino"
+    - "top rated"
+    - "number one"
+    - "most popular"
+    - "the biggest"
+    - "industry-leading"
+
+# =============================================================================
+# AI Stop Words (§14 Stop Words)
+# =============================================================================
+# "Here are commonly overused words in AI-generated content. Please avoid them"
+stop_words:
+  - "thrilling"
+  - "thrill"
+  - "top-notch"
+  - "cherry on top"
+  - "dive in"
+  - "dive into"
+  - "delve"
+  - "into the world"
+  - "whether you are"
+  - "if you are"
+  - "ins and outs"
+  - "step into the world"
+  - "tailored"
+  - "ensure"
+  - "exciting"
+  - "exhilarating"
+  - "picture this"
+  - "informed decisions"
+  - "seasoned"
+  - "state-of-the-art"
+  - "leverage"
+  - "robust"
+  - "sleek"
+  - "cutting-edge"
+  - "top-tier"
+  - "seamless"
+  - "seamlessly"
+  - "navigating"
+  - "locate"
+  - "realm"
+  - "landscape"
+  - "crucial"
+  - "essential"
+  - "apart from"
+  - "at your fingertips"
+  - "elevate"
+  - "excitement"
+  - "step into"
+  - "key"
+  - "embark"
+  - "galore"
+  - "the best part"
+  - "the icing on the cake"
+  - "utilize"
+  - "punters"
+  - "hidden gem"
+  - "unlock"
+  - "maximize"
+  - "gateway"
+  - "immerse"
+  - "breeze"
+  - "enthusiasts"
+  - "premier"
+  - "destination"
+  - "a treasure trove"
+  - "cater"
+  - "selection"
+  - "veteran"
+  - "up our sleeve"
+  - "unraveling"
+
+# =============================================================================
+# Weak Transitions to Flag
+# =============================================================================
+transitions:
+  banned_transitions:
+    - "Now let's look at"
+    - "Let's dive into"
+    - "Without further ado"
+    - "In this section, we will"
+    - "Moving on to"
+    - "As mentioned earlier"
+    - "It's worth noting that"
+    - "It goes without saying"
+    - "Let's explore"
+    - "Let's discuss"
+
+# =============================================================================
+# SEO / Keywords (§8 Keywords)
+# =============================================================================
+seo:
+  # "The keyword density must be up to 3%"
+  max_keyword_density_percent: 3.0
+
+  # "Prioritize readability over keyword integration – do not sacrifice content quality"
+  prioritize_readability: true
+
+  # "Spread keywords evenly in the text"
+  spread_keywords_evenly: true
+
+  # Keyword placement requirements
+  require_keyword_in_h1: true
+  require_keyword_in_first_paragraph: true
+  require_keyword_in_meta_title: true
+  require_keyword_in_meta_description: true
+
+# =============================================================================
+# Compliance (market-specific, can be overridden per brand)
+# =============================================================================
+compliance:
+  # Default to UKGC as most strict
+  market: "UKGC"
+
+  # Require age gate mention (18+/21+)
+  require_age_gate: true
+
+  # Require responsible gambling mention
+  require_rg_mention: true
+
+  # Require T&C reference near bonus claims
+  require_tc_near_bonus: true
+
+# =============================================================================
+# Content Rules (§6 Trusted Info, §9 Other Brand Names)
+# =============================================================================
+content_rules:
+  # §6: "Only use facts that can be checked. Get your info from the casino's
+  # official website or other places you can trust."
+  require_verifiable_facts: true
+
+  # §9: "Don't use any other casino or sportsbook brands in your review
+  # unless they're mentioned among keywords."
+  no_competitor_brands: true
+
+# =============================================================================
+# Originality (§2 Original Content)
+# =============================================================================
+originality:
+  # "Aim for about 90% originality"
+  target_percent: 90
+
+# =============================================================================
+# Engagement (§4 Language, §5 Readability)
+# =============================================================================
+engagement:
+  # "Add appropriate jokes/statistics/fun facts to make your text interesting"
+  encourage_statistics: true
+  encourage_fun_facts: true
+
+  # "Use simple words to explain tricky ideas"
+  use_simple_language: true
+
+  # "Place the most important information in the most noticeable spot"
+  important_info_prominent: true

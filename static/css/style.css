@@ -1,0 +1,1294 @@
+/**
+ * Pitboss v3 - Consolidated Styles
+ *
+ * Extracted from inline styles in templates.
+ * Organized by component for easy maintenance.
+ */
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1, h2, h3, h4 {
+  margin-top: 20px;
+}
+
+h1 {
+  color: #333;
+}
+
+/* ==========================================================================
+   Layout Utilities
+   ========================================================================== */
+
+.max-width-700 {
+  max-width: 700px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  vertical-align: top;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}
+
+/* ==========================================================================
+   Pre-formatted Text
+   ========================================================================== */
+
+pre {
+  white-space: pre-wrap;
+  border: 1px solid #ccc;
+  padding: 10px;
+  background: #fafafa;
+}
+
+ul {
+  margin-top: 5px;
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input[type="file"],
+select,
+input[type="url"] {
+  margin-top: 4px;
+}
+
+select,
+input[type="url"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Source Selection (Form)
+   ========================================================================== */
+
+.source-selection {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 5px;
+}
+
+.source-selection label {
+  display: inline-block;
+  margin-right: 20px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.source-selection input[type="radio"] {
+  margin-right: 5px;
+}
+
+.source-input {
+  margin-top: 15px;
+}
+
+/* ==========================================================================
+   Google Auth
+   ========================================================================== */
+
+.google-auth {
+  margin-top: 10px;
+  padding: 10px;
+  background: #e8f4e8;
+  border-radius: 5px;
+}
+
+.google-auth.not-connected {
+  background: #fff3cd;
+}
+
+.google-auth a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.google-auth a:hover {
+  text-decoration: underline;
+}
+
+.btn-google {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #4285f4;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn-google:hover {
+  background: #357abd;
+  color: white;
+}
+
+.connected-email {
+  color: #155724;
+  font-weight: bold;
+}
+
+.disconnect-link {
+  margin-left: 10px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+/* ==========================================================================
+   Flash Messages
+   ========================================================================== */
+
+.flash-messages {
+  margin-bottom: 15px;
+}
+
+.flash-message {
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.flash-message.warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.flash-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.flash-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* ==========================================================================
+   Selection Controls (Results Page)
+   ========================================================================== */
+
+.selection-controls {
+  background: #f0f7ff;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.selection-controls button {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 4px;
+}
+
+.selection-controls button:hover {
+  background: #f5f5f5;
+}
+
+.selection-count {
+  margin-left: auto;
+  font-weight: bold;
+  color: #333;
+}
+
+/* ==========================================================================
+   Corrections Table
+   ========================================================================== */
+
+.corrections-table {
+  margin-top: 10px;
+}
+
+.corrections-table th:first-child,
+.corrections-table td:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.correction-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.no-change-row {
+  color: #666;
+  background: #fafafa;
+}
+
+.correction-row:hover {
+  background: #f8f8f8;
+}
+
+.original-text {
+  color: #c00;
+}
+
+.corrected-text {
+  color: #060;
+}
+
+/* ==========================================================================
+   Apply Section (Sticky Bottom)
+   ========================================================================== */
+
+.apply-section {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 20px;
+  border-top: 2px solid #4285f4;
+  margin-top: 30px;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-apply {
+  padding: 12px 30px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-apply:hover {
+  background: #357abd;
+}
+
+.btn-apply:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.apply-note {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   Occurrence Selection (Multiple Matches)
+   ========================================================================== */
+
+.occurrence-selector {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff9e6;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+}
+
+.occurrence-option {
+  margin: 5px 0;
+}
+
+.occurrence-context {
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #666;
+}
+
+.occurrence-context .match {
+  background: #ffeb3b;
+  padding: 1px 3px;
+}
+
+/* ==========================================================================
+   Warnings and Notices
+   ========================================================================== */
+
+.not-found-warning {
+  color: #856404;
+  background: #fff3cd;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* ==========================================================================
+   Document Link
+   ========================================================================== */
+
+.doc-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  background: #e8f4e8;
+  border-radius: 4px;
+}
+
+.doc-link a {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.doc-link a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Message Boxes (Apply Confirmation)
+   ========================================================================== */
+
+.success-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+}
+
+.success-message h2 {
+  color: #155724;
+  margin-top: 0;
+}
+
+.warning-message {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+}
+
+.warning-message h3 {
+  color: #856404;
+  margin-top: 0;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+}
+
+.error-message h3 {
+  color: #721c24;
+  margin-top: 0;
+}
+
+/* LLM Fallback Warning */
+.llm-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 10px 0 15px 0;
+  color: #856404;
+}
+
+.llm-warning ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.llm-warning li {
+  margin: 4px 0;
+}
+
+/* Parse Info (successful structured parsing) */
+.parse-info {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 10px 0 15px 0;
+  color: #155724;
+  font-size: 0.9em;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn-primary {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #4285f4;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.btn-primary:hover {
+  background: #357abd;
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.actions {
+  margin-top: 30px;
+}
+
+.actions ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.actions li {
+  margin: 5px 0;
+}
+
+/* ==========================================================================
+   Quality Checks Section (Phase 2)
+   ========================================================================== */
+
+.quality-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.quality-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.quality-badge.quality-pass {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.quality-badge.quality-warn {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.quality-badge.quality-fail {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.quality-badge.quality-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Severity row colors in tables */
+tr.severity-error {
+  background: #fff5f5;
+}
+
+tr.severity-warning {
+  background: #fffdf5;
+}
+
+tr.severity-info {
+  background: #f5f9ff;
+}
+
+/* Details/summary for expandable sections */
+details {
+  margin: 10px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: #495057;
+}
+
+details summary:hover {
+  color: #1a73e8;
+}
+
+details[open] summary {
+  margin-bottom: 10px;
+}
+
+details ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+details li {
+  margin: 8px 0;
+}
+
+/* ==========================================================================
+   Report Summary Bar (Phase 4)
+   ========================================================================== */
+
+.report-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score-value {
+  font-size: 42px;
+  font-weight: bold;
+  color: #333;
+  line-height: 1;
+}
+
+.score-value.score-high {
+  color: #155724;
+}
+
+.score-value.score-medium {
+  color: #856404;
+}
+
+.score-value.score-low {
+  color: #721c24;
+}
+
+.score-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.summary-counts {
+  display: flex;
+  gap: 15px;
+}
+
+.count-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.count-badge .count-number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.count-badge .count-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.count-pass {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.count-warn {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.count-fail {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ==========================================================================
+   Report Tabs (Phase 4)
+   ========================================================================== */
+
+.report-tabs {
+  display: flex;
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 25px;
+  overflow-x: auto;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.tab-button.active {
+  color: #1a73e8;
+  border-bottom-color: #1a73e8;
+  font-weight: 600;
+}
+
+.tab-button .tab-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 6px;
+}
+
+.tab-button .tab-badge.badge-warn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.tab-button .tab-badge.badge-fail {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Responsive Adjustments (Phase 4)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .report-summary {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .summary-counts {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .count-badge {
+    min-width: 70px;
+    padding: 10px 15px;
+  }
+
+  .report-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* ==========================================================================
+   Writer Comments (Phase 6)
+   ========================================================================== */
+
+.comments-table {
+  margin-top: 15px;
+}
+
+.comments-table th {
+  background: #e9ecef;
+  font-weight: 600;
+}
+
+.comments-table td {
+  vertical-align: top;
+}
+
+.comment-row {
+  transition: background-color 0.2s ease;
+}
+
+.comment-row:hover {
+  background: #f8f9fa;
+}
+
+.comment-row.severity-error {
+  border-left: 4px solid #dc3545;
+}
+
+.comment-row.severity-warning {
+  border-left: 4px solid #ffc107;
+}
+
+.comment-row.severity-suggestion {
+  border-left: 4px solid #17a2b8;
+}
+
+.severity-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.severity-badge.severity-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.severity-badge.severity-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.severity-badge.severity-suggestion {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.anchor-text {
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #495057;
+  background: #f8f9fa;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.comment-edit {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 0.9em;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.comment-edit:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.comment-context {
+  display: block;
+  margin-top: 5px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.comment-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.select-controls {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+
+.select-controls label {
+  display: inline;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.apply-btn {
+  padding: 12px 30px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.apply-btn:hover {
+  background: #218838;
+}
+
+.apply-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.info-box {
+  background: #e7f3ff;
+  border: 1px solid #b6d4fe;
+  color: #084298;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin-top: 15px;
+}
+
+.help-text {
+  color: #6c757d;
+  font-size: 0.95em;
+  margin-bottom: 15px;
+}
+
+/* ==========================================================================
+   Fact-Check Section (Phase 7)
+   ========================================================================== */
+
+.fact-check-section {
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.fact-check-section legend {
+  font-weight: bold;
+  color: #333;
+  padding: 0 10px;
+}
+
+.fact-check-section .hint {
+  color: #6c757d;
+  font-size: 0.9em;
+  margin: 0 0 15px 0;
+}
+
+.category-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-weight: normal;
+  font-size: 0.9em;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+}
+
+.checkbox-label:hover {
+  background: #e9ecef;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+/* Fact-Check Results Section */
+.fact-check-results {
+  margin-top: 20px;
+}
+
+.fact-check-summary {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.fact-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 6px;
+  min-width: 80px;
+}
+
+.fact-stat .stat-number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.fact-stat .stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.fact-stat.stat-compliant {
+  background: #d4edda;
+  color: #155724;
+}
+
+.fact-stat.stat-non-compliant {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.fact-stat.stat-not-verifiable {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.fact-stat.stat-total {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Name Verification Matrix */
+.name-verification-table {
+  margin-top: 15px;
+}
+
+.name-verification-table .status-correct {
+  color: #155724;
+}
+
+.name-verification-table .status-incorrect {
+  color: #721c24;
+  font-weight: bold;
+}
+
+.name-verification-table .status-not-found {
+  color: #856404;
+  font-style: italic;
+}
+
+/* Category Claims */
+.category-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.category-section h4 {
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dee2e6;
+  color: #333;
+}
+
+.claim-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border-left: 4px solid #dee2e6;
+}
+
+.claim-item.claim-compliant {
+  background: #f0fff0;
+  border-left-color: #28a745;
+}
+
+.claim-item.claim-non-compliant {
+  background: #fff0f0;
+  border-left-color: #dc3545;
+}
+
+.claim-item.claim-not-verifiable {
+  background: #fffbf0;
+  border-left-color: #ffc107;
+}
+
+.claim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.claim-title {
+  font-weight: bold;
+  color: #333;
+}
+
+.claim-severity {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.claim-severity.severity-critical {
+  background: #dc3545;
+  color: white;
+}
+
+.claim-severity.severity-major {
+  background: #fd7e14;
+  color: white;
+}
+
+.claim-severity.severity-minor {
+  background: #ffc107;
+  color: #333;
+}
+
+.claim-severity.severity-cosmetic {
+  background: #6c757d;
+  color: white;
+}
+
+.claim-detail {
+  margin: 5px 0;
+  font-size: 0.9em;
+}
+
+.claim-detail strong {
+  color: #495057;
+}
+
+.claim-source-url {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 0.85em;
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.claim-source-url:hover {
+  text-decoration: underline;
+}
+
+/* Coverage Log */
+.coverage-log {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.coverage-log h4 {
+  margin: 0 0 10px 0;
+  color: #495057;
+}
+
+.coverage-log ul {
+  margin: 0;
+  padding-left: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.coverage-log li {
+  margin: 4px 0;
+  font-size: 0.85em;
+  font-family: monospace;
+  color: #6c757d;
+}
+
+.coverage-log li a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.coverage-log li a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Check Toggles Section (Phase 9)
+   ========================================================================== */
+
+.check-toggles-section {
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.check-toggles-section legend {
+  font-weight: bold;
+  color: #333;
+  padding: 0 10px;
+}
+
+.check-toggles-section .hint {
+  color: #6c757d;
+  font-size: 0.9em;
+  margin: 0 0 15px 0;
+}
+
+.check-toggles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.check-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.check-toggle:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.check-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.check-toggle input[type="checkbox"]:checked + span {
+  color: #155724;
+  font-weight: 500;
+}
+
+.check-toggle-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.check-toggle-actions button {
+  padding: 6px 14px;
+  font-size: 0.85em;
+  background: white;
+  border: 1px solid #adb5bd;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.check-toggle-actions button:hover {
+  background: #e9ecef;
+}
+
+/* ==========================================================================
+   Report Export Button (Phase 9)
+   ========================================================================== */
+
+.btn-export {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.btn-export:hover {
+  background: #218838;
+  color: white;
+}
