@@ -10,6 +10,9 @@
   <h1>Proofreading & SEO Report</h1>
   <div style="margin-bottom: 15px;">
     <strong>English variant:</strong> {{ english_variant }}
+    {% if task_name %}
+    &nbsp;&nbsp;|&nbsp;&nbsp;<strong>Task:</strong> {{ task_name }}
+    {% endif %}
     {% if session_id %}
     <a href="{{ url_for('export_report', session_id=session_id) }}" class="btn-export" style="float: right;">Download Report (DOCX)</a>
     {% endif %}
@@ -298,7 +301,29 @@
       <li>
         <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
         {{ finding.recommendation }}
-        <br><small>Examples: {{ finding.examples|join(', ') }}</small>
+        {% if finding.occurrences %}
+        <table class="occurrences-table" style="margin-top: 8px; font-size: 0.9em;">
+          <tr><th>Text</th><th>Format</th><th>Location</th></tr>
+          {% for occ in finding.occurrences %}
+          <tr>
+            <td><code>{{ occ.text }}</code></td>
+            <td>{{ occ.format }}</td>
+            <td>{{ occ.location }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+        {% if finding.non_conforming_headings %}
+        <table class="occurrences-table" style="margin-top: 8px; font-size: 0.9em;">
+          <tr><th>Current</th><th>Suggested</th></tr>
+          {% for h in finding.non_conforming_headings %}
+          <tr>
+            <td>"{{ h.current }}" ({{ h.current_style }})</td>
+            <td>"{{ h.suggested }}"</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -325,8 +350,14 @@
         <li>
           <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
           {{ finding.message }}
+          {% if finding.location %}
+          <br><strong>Location:</strong> {{ finding.location }}
+          {% endif %}
           {% if finding.text %}
-          <br><small>"{{ finding.text[:100] }}..."</small>
+          <br><small>Text: "<code>{{ finding.text[:80] }}</code>{% if finding.text|length > 80 %}...{% endif %}"</small>
+          {% endif %}
+          {% if finding.preview %}
+          <br><small>Text: "<code>{{ finding.preview[:80] }}</code>{% if finding.preview|length > 80 %}...{% endif %}"</small>
           {% endif %}
         </li>
         {% endfor %}
@@ -384,8 +415,25 @@
       <li class="severity-{{ finding.severity }}">
         <strong>{{ finding.type|replace('_', ' ')|title }}:</strong>
         {{ finding.message }}
+        {% if finding.description %}
+        <br>{{ finding.description }}
+        {% endif %}
+        {% if finding.occurrences %}
+        <details style="margin-top: 5px;">
+          <summary>Show {{ finding.occurrences|length }} occurrence(s)</summary>
+          <table class="occurrences-table" style="font-size: 0.9em;">
+            <tr><th>Context</th><th>Location</th></tr>
+            {% for occ in finding.occurrences[:8] %}
+            <tr>
+              <td><code>{{ occ.context|safe }}</code></td>
+              <td>{{ occ.location }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </details>
+        {% endif %}
         {% if finding.suggestion %}
-        <br><small><em>{{ finding.suggestion }}</em></small>
+        <br><small><em>Suggestion: {{ finding.suggestion }}</em></small>
         {% endif %}
       </li>
       {% endfor %}

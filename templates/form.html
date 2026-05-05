@@ -94,6 +94,15 @@
       {% endif %}
     </div>
 
+    <!-- Task Selection (for multi-task briefs) -->
+    <div id="task-selection" class="source-input" style="display: none;">
+      <label>Task</label>
+      <select name="task_name" id="task_name">
+        <option value="">-- Select Task --</option>
+      </select>
+      <small style="color: #666;">This brief contains multiple tasks. Select which one to check.</small>
+    </div>
+
     <!-- English Variant -->
     <label>English variant</label>
     <select name="english_variant">
@@ -271,6 +280,74 @@
         checkbox.checked = checked;
       });
     }
+
+    // Detect tasks in brief file when uploaded
+    async function detectBriefTasks(file) {
+      const taskDiv = document.getElementById('task-selection');
+      const taskSelect = document.getElementById('task_name');
+
+      if (!file) {
+        taskDiv.style.display = 'none';
+        taskSelect.innerHTML = '<option value="">-- Select Task --</option>';
+        return;
+      }
+
+      // Only check Excel files for multi-task structure
+      const filename = file.name.toLowerCase();
+      if (!filename.endsWith('.xls') && !filename.endsWith('.xlsx')) {
+        taskDiv.style.display = 'none';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('brief_file', file);
+
+      try {
+        const response = await fetch('/parse-brief-tasks', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (data.tasks && data.tasks.length > 1) {
+          // Multiple tasks found - show dropdown
+          taskSelect.innerHTML = '<option value="">-- Select Task --</option>';
+          data.tasks.forEach(task => {
+            const option = document.createElement('option');
+            option.value = task;
+            option.textContent = task;
+            taskSelect.appendChild(option);
+          });
+          taskDiv.style.display = 'block';
+        } else {
+          // Single task or no tasks - hide dropdown
+          taskDiv.style.display = 'none';
+          taskSelect.innerHTML = '<option value="">-- Select Task --</option>';
+        }
+      } catch (err) {
+        console.error('Failed to parse brief tasks:', err);
+        taskDiv.style.display = 'none';
+      }
+    }
+
+    // Listen for brief file changes
+    document.querySelector('input[name="brief_file"]').addEventListener('change', function() {
+      detectBriefTasks(this.files[0]);
+    });
+
+    // Hide task selection when switching to Google Sheet
+    function toggleBriefInputsWithTask() {
+      toggleBriefInputs();
+      const briefSourceType = document.querySelector('input[name="brief_source_type"]:checked').value;
+      if (briefSourceType === 'google_sheet') {
+        document.getElementById('task-selection').style.display = 'none';
+      }
+    }
+
+    // Update brief source toggle to also handle task selection
+    document.querySelectorAll('input[name="brief_source_type"]').forEach(function(radio) {
+      radio.addEventListener('change', toggleBriefInputsWithTask);
+    });
 
     // Initialize on page load
     toggleSourceInputs();

@@ -1,47 +1,56 @@
 """
 Google OAuth 2.0 authentication helpers for iGaming Checker.
 Handles the OAuth flow for accessing Google Docs.
+
+Uses manual OAuth implementation without PKCE to avoid session
+persistence issues with Flask file-based sessions across redirects.
 """
 
-from google_auth_oauthlib.flow import Flow
+import secrets
+from urllib.parse import urlencode, urlparse, parse_qs
+
+import requests
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from flask import session
 import config
 
 
-def create_oauth_flow():
-    """Create an OAuth 2.0 flow instance."""
+def generate_random_state():
+    """Generate a random state string for CSRF protection."""
+    return secrets.token_urlsafe(32)
+
+
+def get_authorization_url():
+    """
+    Generate the Google OAuth authorization URL manually (no PKCE).
+
+    Bypasses google_auth_oauthlib.flow.Flow to avoid PKCE code_verifier
+    session persistence issues.
+    """
     if not config.GOOGLE_CLIENT_ID or not config.GOOGLE_CLIENT_SECRET:
         raise ValueError(
             "Google OAuth credentials not configured. "
             "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables."
         )
 
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": config.GOOGLE_CLIENT_ID,
-                "client_secret": config.GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-            }
-        },
-        scopes=config.GOOGLE_SCOPES,
-        redirect_uri=config.GOOGLE_REDIRECT_URI
-    )
-    return flow
-
-
-def get_authorization_url():
-    """Generate the Google OAuth authorization URL."""
-    flow = create_oauth_flow()
-    auth_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent'
-    )
+    # Generate and store state for CSRF protection
+    state = generate_random_state()
     session['oauth_state'] = state
+
+    # Build authorization URL manually - no PKCE
+    params = {
+        'client_id': config.GOOGLE_CLIENT_ID,
+        'redirect_uri': config.GOOGLE_REDIRECT_URI,
+        'response_type': 'code',
+        'scope': ' '.join(config.GOOGLE_SCOPES),
+        'access_type': 'offline',
+        'prompt': 'consent',
+        'state': state,
+        'include_granted_scopes': 'true',
+    }
+
+    auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urlencode(params)
     return auth_url
 
 
@@ -49,25 +58,69 @@ def handle_oauth_callback(authorization_response):
     """
     Handle the OAuth callback and store credentials in session.
 
+    Uses manual token exchange without PKCE.
+
     Args:
         authorization_response: The full callback URL with auth code
 
     Returns:
         The user's email address
     """
-    flow = create_oauth_flow()
-    flow.fetch_token(authorization_response=authorization_response)
-    credentials = flow.credentials
+    if not config.GOOGLE_CLIENT_ID or not config.GOOGLE_CLIENT_SECRET:
+        raise ValueError(
+            "Google OAuth credentials not configured. "
+            "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables."
+        )
+
+    # Parse the authorization code from the callback URL
+    parsed = urlparse(authorization_response)
+    query_params = parse_qs(parsed.query)
+
+    if 'error' in query_params:
+        raise ValueError(f"OAuth error: {query_params['error'][0]}")
+
+    code = query_params.get('code', [None])[0]
+    if not code:
+        raise ValueError("No authorization code in callback")
+
+    # Exchange code for tokens manually (no PKCE)
+    token_response = requests.post(
+        'https://oauth2.googleapis.com/token',
+        data={
+            'code': code,
+            'client_id': config.GOOGLE_CLIENT_ID,
+            'client_secret': config.GOOGLE_CLIENT_SECRET,
+            'redirect_uri': config.GOOGLE_REDIRECT_URI,
+            'grant_type': 'authorization_code',
+        },
+        timeout=30
+    )
+
+    if token_response.status_code != 200:
+        error_data = token_response.json()
+        raise ValueError(f"Token exchange failed: {error_data.get('error_description', error_data.get('error', 'Unknown error'))}")
+
+    tokens = token_response.json()
 
     # Store credentials in session
     session['google_credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': list(credentials.scopes) if credentials.scopes else []
+        'token': tokens.get('access_token'),
+        'refresh_token': tokens.get('refresh_token'),
+        'token_uri': 'https://oauth2.googleapis.com/token',
+        'client_id': config.GOOGLE_CLIENT_ID,
+        'client_secret': config.GOOGLE_CLIENT_SECRET,
+        'scopes': tokens.get('scope', '').split() if tokens.get('scope') else config.GOOGLE_SCOPES
     }
+
+    # Build credentials object for API calls
+    credentials = Credentials(
+        token=tokens.get('access_token'),
+        refresh_token=tokens.get('refresh_token'),
+        token_uri='https://oauth2.googleapis.com/token',
+        client_id=config.GOOGLE_CLIENT_ID,
+        client_secret=config.GOOGLE_CLIENT_SECRET,
+        scopes=config.GOOGLE_SCOPES
+    )
 
     # Get user email
     try:

@@ -15,7 +15,7 @@ from .doc_parser import parse_docx_brief
 __all__ = ['BriefData', 'KeywordSpec', 'parse_brief', 'parse_google_sheet']
 
 
-def parse_brief(file_storage) -> BriefData:
+def parse_brief(file_storage, task_name: str = None) -> BriefData:
     """
     Parse a brief file and return structured BriefData.
 
@@ -24,6 +24,7 @@ def parse_brief(file_storage) -> BriefData:
 
     Args:
         file_storage: Flask FileStorage object with the uploaded file
+        task_name: Optional task name to filter to (for multi-task briefs)
 
     Returns:
         BriefData with keywords (if found) and raw_text
@@ -43,7 +44,7 @@ def parse_brief(file_storage) -> BriefData:
     parse_method = "none"
 
     if ext in [".xls", ".xlsx"]:
-        keywords, raw_text, warnings = parse_excel_brief(file_bytes)
+        keywords, raw_text, warnings = parse_excel_brief(file_bytes, task_name=task_name)
         parse_method = "excel" if keywords else "none"
 
     elif ext == ".docx":
@@ -62,11 +63,12 @@ def parse_brief(file_storage) -> BriefData:
         keywords=keywords,
         raw_text=raw_text,
         parse_method=parse_method,
-        parse_warnings=warnings
+        parse_warnings=warnings,
+        task_name=task_name
     )
 
 
-def parse_google_sheet(sheet_id: str) -> BriefData:
+def parse_google_sheet(sheet_id: str, task_name: str = None) -> BriefData:
     """
     Parse a Google Sheet and return structured BriefData.
 
@@ -75,6 +77,7 @@ def parse_google_sheet(sheet_id: str) -> BriefData:
 
     Args:
         sheet_id: Google Spreadsheet ID
+        task_name: Optional task name to filter to (for multi-task briefs)
 
     Returns:
         BriefData with keywords (if found) and raw_text,
@@ -95,7 +98,7 @@ def parse_google_sheet(sheet_id: str) -> BriefData:
         )
 
     # Parse the DataFrames
-    keywords, raw_text, warnings = parse_sheets_dataframes(sheets_data)
+    keywords, raw_text, warnings = parse_sheets_dataframes(sheets_data, task_name=task_name)
 
     parse_method = "google_sheets" if keywords else "none"
 
@@ -103,5 +106,6 @@ def parse_google_sheet(sheet_id: str) -> BriefData:
         keywords=keywords,
         raw_text=raw_text,
         parse_method=parse_method,
-        parse_warnings=warnings
+        parse_warnings=warnings,
+        task_name=task_name
     )

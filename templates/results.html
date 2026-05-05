@@ -14,7 +14,12 @@
     <a href="{{ url_for('export_report', session_id=session_id) }}" class="btn-export">Download Report (DOCX)</a>
   </div>
 
-  <p><strong>English variant:</strong> {{ english_variant }}</p>
+  <p>
+    <strong>English variant:</strong> {{ english_variant }}
+    {% if task_name %}
+    &nbsp;&nbsp;|&nbsp;&nbsp;<strong>Task:</strong> {{ task_name }}
+    {% endif %}
+  </p>
 
   <!-- Summary Bar -->
   <div class="report-summary">

@@ -39,6 +39,7 @@ class BriefData:
     raw_text: str = ""                  # Full brief text for SEO check
     parse_method: str = "none"          # "excel", "docx", "llm_fallback"
     parse_warnings: List[str] = field(default_factory=list)
+    task_name: Optional[str] = None     # Selected task name (for multi-task briefs)
 
     def get_keywords_by_group(self) -> dict:
         """

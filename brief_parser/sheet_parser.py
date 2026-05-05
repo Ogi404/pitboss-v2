@@ -3,11 +3,14 @@ Excel/Google Sheets brief parser.
 
 Extracts keywords from structured Excel briefs by detecting
 keyword columns, usage counts, and keyword groups.
+
+Supports multi-task briefs where multiple task blocks are stacked
+in a single sheet, separated by "Task name:" rows.
 """
 
 import re
 from io import BytesIO
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 import pandas as pd
 
 from .base import KeywordSpec
@@ -243,12 +246,94 @@ def _extract_keywords_from_section(
     return keywords
 
 
-def parse_excel_brief(file_bytes: bytes) -> Tuple[List[KeywordSpec], str, List[str]]:
+def _detect_task_blocks(df: pd.DataFrame) -> List[Dict]:
+    """
+    Detect task blocks in multi-task briefs.
+
+    Scans column A for rows containing "Task name:" (case-insensitive).
+    The task name is extracted from column B of that row.
+
+    Returns:
+        List of dicts: [{"name": "Main Page", "start_row": 0, "end_row": 45}, ...]
+        If no tasks found, returns [{"name": None, "start_row": 0, "end_row": len(df)-1}]
+    """
+    task_rows = []
+
+    # Scan column A for "Task name:" (case-insensitive)
+    for idx in range(len(df)):
+        cell_a = str(df.iloc[idx, 0]).strip().lower() if pd.notna(df.iloc[idx, 0]) else ""
+        if "task name:" in cell_a or cell_a == "task name":
+            # Task name is in column B
+            task_name = ""
+            if len(df.columns) > 1 and pd.notna(df.iloc[idx, 1]):
+                task_name = str(df.iloc[idx, 1]).strip()
+            if not task_name:
+                task_name = f"Task {len(task_rows) + 1}"
+            task_rows.append({"name": task_name, "start_row": idx})
+
+    # If no tasks found, treat entire sheet as single task
+    if not task_rows:
+        return [{"name": None, "start_row": 0, "end_row": len(df) - 1}]
+
+    # Set end_row for each task (row before next task, or end of sheet)
+    tasks = []
+    for i, task in enumerate(task_rows):
+        if i + 1 < len(task_rows):
+            task["end_row"] = task_rows[i + 1]["start_row"] - 1
+        else:
+            task["end_row"] = len(df) - 1
+        tasks.append(task)
+
+    return tasks
+
+
+def get_task_names_from_excel(file_bytes: bytes) -> List[str]:
+    """
+    Get list of task names from an Excel brief without full parsing.
+
+    Used to populate the task dropdown in the form.
+
+    Args:
+        file_bytes: Raw bytes of the Excel file
+
+    Returns:
+        List of task names found. Empty list if single-task brief or error.
+    """
+    try:
+        excel_file = BytesIO(file_bytes)
+        xls = pd.ExcelFile(excel_file)
+    except Exception:
+        return []
+
+    all_tasks = []
+
+    for sheet_name in xls.sheet_names:
+        try:
+            df = xls.parse(sheet_name, dtype=str, header=None)
+            df = df.fillna("")
+
+            if df.empty:
+                continue
+
+            tasks = _detect_task_blocks(df)
+            # Only add tasks that have actual names (not None)
+            for t in tasks:
+                if t["name"] and t["name"] not in all_tasks:
+                    all_tasks.append(t["name"])
+
+        except Exception:
+            continue
+
+    return all_tasks
+
+
+def parse_excel_brief(file_bytes: bytes, task_name: str = None) -> Tuple[List[KeywordSpec], str, List[str]]:
     """
     Parse an Excel file and extract keyword specifications.
 
     Args:
         file_bytes: Raw bytes of the Excel file
+        task_name: Optional task name to filter to (for multi-task briefs)
 
     Returns:
         Tuple of (keywords_list, raw_text, warnings)
@@ -269,12 +354,22 @@ def parse_excel_brief(file_bytes: bytes) -> Tuple[List[KeywordSpec], str, List[s
             df = xls.parse(sheet_name, dtype=str, header=None)
             df = df.fillna("")
 
+            if df.empty or len(df) < 2:
+                continue
+
+            # Detect task blocks for multi-task briefs
+            task_blocks = _detect_task_blocks(df)
+
+            # If task_name specified, filter to that block's rows only
+            if task_name:
+                block = next((t for t in task_blocks if t["name"] == task_name), None)
+                if block:
+                    df = df.iloc[block["start_row"]:block["end_row"] + 1].reset_index(drop=True)
+                    warnings.append(f"Filtered to task: {task_name}")
+
             # Store raw text for SEO check
             raw_texts.append(f"=== Sheet: {sheet_name} ===")
             raw_texts.append(df.to_string(index=False, header=False))
-
-            if df.empty or len(df) < 2:
-                continue
 
             # NEW APPROACH: Scan ALL cells for keyword section headers
             # (e.g., "Main keywords", "Support keywords", "LSI keywords")
@@ -361,7 +456,35 @@ def parse_excel_brief(file_bytes: bytes) -> Tuple[List[KeywordSpec], str, List[s
     return keywords, raw_text, warnings
 
 
-def parse_sheets_dataframes(sheets_dict: dict) -> Tuple[List[KeywordSpec], str, List[str]]:
+def get_task_names_from_sheets(sheets_dict: dict) -> List[str]:
+    """
+    Get list of task names from Google Sheets DataFrames without full parsing.
+
+    Args:
+        sheets_dict: Dict mapping sheet names to pandas DataFrames
+
+    Returns:
+        List of task names found. Empty list if single-task brief.
+    """
+    all_tasks = []
+
+    for sheet_name, df in sheets_dict.items():
+        try:
+            df = df.fillna("")
+            if df.empty:
+                continue
+
+            tasks = _detect_task_blocks(df)
+            for t in tasks:
+                if t["name"] and t["name"] not in all_tasks:
+                    all_tasks.append(t["name"])
+        except Exception:
+            continue
+
+    return all_tasks
+
+
+def parse_sheets_dataframes(sheets_dict: dict, task_name: str = None) -> Tuple[List[KeywordSpec], str, List[str]]:
     """
     Parse keyword specifications from a dict of DataFrames (from Google Sheets).
 
@@ -370,6 +493,7 @@ def parse_sheets_dataframes(sheets_dict: dict) -> Tuple[List[KeywordSpec], str, 
 
     Args:
         sheets_dict: Dict mapping sheet names to pandas DataFrames
+        task_name: Optional task name to filter to (for multi-task briefs)
 
     Returns:
         Tuple of (keywords_list, raw_text, warnings)
@@ -382,12 +506,22 @@ def parse_sheets_dataframes(sheets_dict: dict) -> Tuple[List[KeywordSpec], str, 
         try:
             df = df.fillna("")
 
+            if df.empty or len(df) < 2:
+                continue
+
+            # Detect task blocks for multi-task briefs
+            task_blocks = _detect_task_blocks(df)
+
+            # If task_name specified, filter to that block's rows only
+            if task_name:
+                block = next((t for t in task_blocks if t["name"] == task_name), None)
+                if block:
+                    df = df.iloc[block["start_row"]:block["end_row"] + 1].reset_index(drop=True)
+                    warnings.append(f"Filtered to task: {task_name}")
+
             # Store raw text for SEO check
             raw_texts.append(f"=== Sheet: {sheet_name} ===")
             raw_texts.append(df.to_string(index=False, header=False))
-
-            if df.empty or len(df) < 2:
-                continue
 
             # NEW APPROACH: Scan ALL cells for keyword section headers
             # (e.g., "Main keywords", "Support keywords", "LSI keywords")

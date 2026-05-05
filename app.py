@@ -425,6 +425,9 @@ def auth_google():
     """Initiate Google OAuth flow."""
     try:
         auth_url = get_authorization_url()
+        print(f"[AUTH] Session keys before redirect: {list(session.keys())}")
+        print(f"[AUTH] code_verifier set: {'code_verifier' in session}")
+        print(f"[AUTH] Session type: {type(session)}")
         return redirect(auth_url)
     except ValueError as e:
         return f"OAuth configuration error: {e}", 500
@@ -433,6 +436,9 @@ def auth_google():
 @app.route("/auth/google/callback")
 def auth_google_callback():
     """Handle Google OAuth callback."""
+    print(f"[AUTH] Session keys in callback: {list(session.keys())}")
+    print(f"[AUTH] code_verifier found: {'code_verifier' in session}")
+    print(f"[AUTH] Session type: {type(session)}")
     try:
         handle_oauth_callback(request.url)
         return redirect(url_for('index'))
@@ -445,6 +451,40 @@ def logout():
     """Clear Google credentials and session."""
     clear_credentials()
     return redirect(url_for('index'))
+
+
+@app.route("/parse-brief-tasks", methods=["POST"])
+def parse_brief_tasks():
+    """
+    Parse brief file and return list of task names (for multi-task briefs).
+
+    Used by AJAX to populate the task dropdown in the form.
+    Only processes Excel files - DOCX briefs don't support multi-task.
+    """
+    from flask import jsonify
+    import tempfile
+
+    if 'brief_file' not in request.files:
+        return jsonify({"tasks": [], "error": "No file uploaded"})
+
+    file = request.files['brief_file']
+    if not file.filename:
+        return jsonify({"tasks": []})
+
+    # Only Excel files support multi-task structure
+    filename = file.filename.lower()
+    if not (filename.endswith('.xls') or filename.endswith('.xlsx')):
+        return jsonify({"tasks": []})
+
+    try:
+        file_bytes = file.read()
+        file.seek(0)
+
+        from brief_parser.sheet_parser import get_task_names_from_excel
+        tasks = get_task_names_from_excel(file_bytes)
+        return jsonify({"tasks": tasks})
+    except Exception as e:
+        return jsonify({"tasks": [], "error": str(e)})
 
 
 @app.route("/run", methods=["POST"])
@@ -475,6 +515,9 @@ def run():
     fact_categories = request.form.getlist("fact_categories")
     # Convert to integers
     fact_categories = [int(c) for c in fact_categories] if fact_categories else []
+
+    # Multi-task brief support - get selected task name
+    task_name = request.form.get("task_name", "").strip() or None
 
     # Check toggles (Phase 9) - which checks to run
     enabled_checks = request.form.getlist("enabled_checks")
@@ -537,14 +580,14 @@ def run():
             sheet_id = extract_sheet_id(brief_sheet_url)
             if not sheet_id:
                 return "Invalid Google Sheet URL. Please provide a valid Google Sheets link.", 400
-            brief_data = parse_google_sheet(sheet_id)
+            brief_data = parse_google_sheet(sheet_id, task_name=task_name)
             # Check for auth error
             if brief_data.parse_method == "auth_error":
                 session.pop('google_credentials', None)
                 flash('Your Google session has expired. Please sign in again.', 'warning')
                 return redirect(url_for('auth_google'))
         else:
-            brief_data = parse_brief(brief_file)
+            brief_data = parse_brief(brief_file, task_name=task_name)
     except Exception as e:
         return f"Error reading task brief: {e}", 500
 
@@ -841,6 +884,7 @@ def run():
             ),
             'report_summary': report_summary,
             'writer_comments': writer_comments,  # Phase 6
+            'task_name': brief_data.task_name,  # Multi-task brief support
             # Phase 7: Fact-check data
             'fact_check': {
                 'enabled': bool(operator_url),
@@ -883,6 +927,7 @@ def run():
         ),
         'report_summary': report_summary,
         'writer_comments': writer_comments,
+        'task_name': brief_data.task_name,  # Multi-task brief support
         'fact_check': {
             'enabled': bool(operator_url),
             'operator_url': operator_url,
@@ -918,6 +963,7 @@ def run():
         report_summary=report_summary,
         writer_comments=writer_comments,  # Phase 6
         source_type=source_type,
+        task_name=brief_data.task_name,  # Multi-task brief support
         # Phase 7: Fact-check data
         fact_check={
             'enabled': bool(operator_url),
@@ -966,6 +1012,7 @@ def results(session_id):
         report_summary=result_data.get('report_summary', {}),
         writer_comments=result_data.get('writer_comments', []),  # Phase 6
         fact_check=result_data.get('fact_check', {}),  # Phase 7
+        task_name=result_data.get('task_name'),  # Multi-task brief support
     )
 
 
